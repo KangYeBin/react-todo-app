@@ -9,13 +9,15 @@ import Login from './components/user/Login';
 function App() {
   return (
     <>
-      <Header />
-      <Routes>
-        <Route path="/" element={<TodoTemplate />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/join" element={<Join />} />
-      </Routes>
-      <Footer />
+      <div className="wrapper">
+        <Header />
+        <Routes>
+          <Route path="/" element={<TodoTemplate />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/join" element={<Join />} />
+        </Routes>
+        <Footer />
+      </div>
     </>
   );
 }
