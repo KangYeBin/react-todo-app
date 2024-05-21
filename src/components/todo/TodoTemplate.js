@@ -14,24 +14,35 @@ const TodoTemplate = () => {
   // TodoInput에게 todoText를 받아오는 함수
   // 자식 컴포넌트가 부모 컴포넌트에게 데이터를 전달할 때는 일반적인 props 사용 불가
   // 부모 컴포넌트에서 함수(매개변수)를 선언
-  const addTodo = (todoText) => {
+  const addTodo = async (todoText) => {
     const newTodo = {
       title: todoText,
     };
 
-    fetch(API_BASE_URL, {
+    const res = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
       body: JSON.stringify(newTodo),
-    })
-      .then((res) => {
-        if (res.status === 200) return res.json();
-        else console.log('error occured');
-        // status 코드에 따라 에러 처리를 다르게 진행
-      })
-      .then((data) => setTodos(data.todos));
+    });
+
+    const json = await res.json();
+    setTodos(json);
+
+    // fetch(API_BASE_URL, {
+    //   method: 'POST',
+    //   headers: {
+    //     'content-type': 'application/json',
+    //   },
+    //   body: JSON.stringify(newTodo),
+    // })
+    //   .then((res) => {
+    //     if (res.status === 200) return res.json();
+    //     else console.log('error occured');
+    //     // status 코드에 따라 에러 처리를 다르게 진행
+    //   })
+    //   .then((data) => setTodos(data.todos));
   };
 
   // 할 일 삭제 처리 함수
