@@ -4,6 +4,7 @@ import TodoMain from './TodoMain';
 import TodoHeader from './TodoHeader';
 import TodoInput from './TodoInput';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from 'reactstrap';
 
 const TodoTemplate = () => {
   const redirection = useNavigate();
@@ -14,7 +15,8 @@ const TodoTemplate = () => {
   // todos 배열을 상태 관리
   const [todos, setTodos] = useState([]);
 
-  // 로딩 상태값 관리
+  // 로딩 상태값 관리 (처음에는 로딩이 무조건 필요하므로 true -> 로딩이 끝나면 false로)
+  const [loading, setLoading] = useState(true);
 
   // 로그인 인증 토큰 가져오기
   const token = localStorage.getItem('ACCESS_TOKEN');
@@ -110,20 +112,33 @@ const TodoTemplate = () => {
 
         // fetch를 통해 받아온 데이터를 상태 변수에 할당
         if (json) setTodos(json.todos);
+
+        // 로딩 완료 처리
+        setLoading(false);
       });
   }, []);
 
-  return (
+  // 로딩이 끝난 후 보여줄 컴포넌트
+  const loadEndedPage = (
     <div className="TodoTemplate">
-      <TodoHeader count={countRestTodo} />{' '}
+      <TodoHeader count={countRestTodo} />
       <TodoMain
         todoList={todos}
         remove={removeTodo}
         check={checkTodo}
-      />{' '}
-      <TodoInput addTodo={addTodo} />{' '}
+      />
+      <TodoInput addTodo={addTodo} />
     </div>
   );
+
+  // 로딩 중일 때 보여줄 컴포넌트
+  const loadingPage = (
+    <div className="loading">
+      <Spinner color="danger">loading...</Spinner>
+    </div>
+  );
+
+  return <>{loading ? loadingPage : loadEndedPage}</>;
 };
 
 export default TodoTemplate;
