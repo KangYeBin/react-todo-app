@@ -6,8 +6,7 @@ import AuthContext from '../../utils/AuthContext';
 const Header = () => {
   const redirection = useNavigate();
   // AuthContext에서 로그인 상태 가져오기
-  const { isLoggedIn, userName, onLogIn, onLogout } =
-    useContext(AuthContext);
+  const { isLoggedIn, userName, onLogout } = useContext(AuthContext);
 
   // 로그아웃 핸들러
   const logoutHandler = () => {
