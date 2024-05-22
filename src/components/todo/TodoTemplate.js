@@ -5,12 +5,18 @@ import TodoHeader from './TodoHeader';
 import TodoInput from './TodoInput';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from 'reactstrap';
+import {
+  API_BASE_URL as BASE,
+  TODO,
+  USER,
+} from './../../config/host-config';
 
 const TodoTemplate = () => {
   const redirection = useNavigate();
 
   // 백엔드 서버에 할 일 목록(json)을 요청(fetch)해서 받아와야 한다.
-  const API_BASE_URL = 'http://localhost:8181/api/todos';
+  const API_BASE_URL = BASE + TODO;
+  const API_USER_URL = BASE + USER;
 
   // todos 배열을 상태 관리
   const [todos, setTodos] = useState([]);
@@ -19,7 +25,9 @@ const TodoTemplate = () => {
   const [loading, setLoading] = useState(true);
 
   // 로그인 인증 토큰 가져오기
-  const token = localStorage.getItem('ACCESS_TOKEN');
+  const [token, setToken] = useState(
+    localStorage.getItem('ACCESS_TOKEN'),
+  );
 
   // fetch 요청을 보낼 때 사용할 요청 헤더 설정
   const requestHeader = {
@@ -42,8 +50,13 @@ const TodoTemplate = () => {
       body: JSON.stringify(newTodo),
     });
 
-    const json = await res.json();
-    setTodos(json.todos);
+    if (res.status === 200) {
+      const json = await res.json();
+      setTodos(json.todos);
+    } else if (res.status === 403) {
+      const text = await res.text();
+      alert(text);
+    }
 
     // fetch(API_BASE_URL, {
     //   method: 'POST',
@@ -92,6 +105,23 @@ const TodoTemplate = () => {
   const countRestTodo = () =>
     todos.filter((todo) => !todo.done).length;
 
+  // 비동기 방식 등급 승격 함수
+  const fetchPromote = async () => {
+    const res = await fetch(API_USER_URL + '/promote', {
+      method: 'PUT',
+      headers: requestHeader,
+    });
+
+    if (res.status === 400) {
+      alert('이미 프리미엄 회원입니다');
+    } else if (res.status === 200) {
+      const json = await res.json();
+      localStorage.setItem('ACCESS_TOKEN', json.token);
+      localStorage.setItem('USER_ROLE', json.role);
+      setToken(json.token);
+    }
+  };
+
   useEffect(() => {
     // 페이지가 처음 렌더링 됨과 동시에 할 일 목록을 서버에 요청해서 뿌려 주겠습니다.
     fetch(API_BASE_URL, {
@@ -121,7 +151,7 @@ const TodoTemplate = () => {
   // 로딩이 끝난 후 보여줄 컴포넌트
   const loadEndedPage = (
     <div className="TodoTemplate">
-      <TodoHeader count={countRestTodo} />
+      <TodoHeader count={countRestTodo} promote={fetchPromote} />
       <TodoMain
         todoList={todos}
         remove={removeTodo}
