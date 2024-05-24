@@ -10,6 +10,7 @@ import {
   TODO,
   USER,
 } from './../../config/host-config';
+import axiosInstance from '../../config/axios-config';
 
 const TodoTemplate = () => {
   const redirection = useNavigate();
@@ -39,24 +40,37 @@ const TodoTemplate = () => {
   // TodoInput에게 todoText를 받아오는 함수
   // 자식 컴포넌트가 부모 컴포넌트에게 데이터를 전달할 때는 일반적인 props 사용 불가
   // 부모 컴포넌트에서 함수(매개변수)를 선언
+
+  // 할 일 추가 함수
   const addTodo = async (todoText) => {
     const newTodo = {
       title: todoText,
     };
 
-    const res = await fetch(API_BASE_URL, {
-      method: 'POST',
-      headers: requestHeader,
-      body: JSON.stringify(newTodo),
-    });
-
-    if (res.status === 200) {
-      const json = await res.json();
-      setTodos(json.todos);
-    } else if (res.status === 403) {
-      const text = await res.text();
-      alert(text);
+    try {
+      const res = await axiosInstance.post(API_BASE_URL, newTodo);
+      if (res.status === 200) setTodos(res.data.todos);
+    } catch (error) {
+      console.log('error : ', error);
     }
+
+    // const res = await fetch(API_BASE_URL, {
+    //   method: 'POST',
+    //   headers: requestHeader,
+    //   body: JSON.stringify(newTodo),
+    // });
+
+    // if (res.status === 200) {
+    //   const json = await res.json();
+    //   setTodos(json.todos);
+    // } else if (res.status === 401) {
+    //   const message = await res.json();
+    //   alert(message);
+    //   redirection('/');
+    // } else if (res.status === 403) {
+    //   const text = await res.text();
+    //   alert(text);
+    // }
 
     // fetch(API_BASE_URL, {
     //   method: 'POST',
@@ -118,34 +132,22 @@ const TodoTemplate = () => {
       const json = await res.json();
       localStorage.setItem('ACCESS_TOKEN', json.token);
       localStorage.setItem('USER_ROLE', json.role);
-      setToken(json.token);
     }
   };
 
   useEffect(() => {
     // 페이지가 처음 렌더링 됨과 동시에 할 일 목록을 서버에 요청해서 뿌려 주겠습니다.
-    fetch(API_BASE_URL, {
-      method: 'GET',
-      headers: requestHeader,
-    })
-      .then((res) => {
-        if (res.status === 200) return res.json();
-        else if (res.status === 403) {
-          alert('로그인이 필요한 서비스입니다');
-          redirection('/login');
-        } else {
-          alert('관리자에게 문의하세요');
-        }
-      })
-      .then((json) => {
-        console.log(json);
-
-        // fetch를 통해 받아온 데이터를 상태 변수에 할당
-        if (json) setTodos(json.todos);
-
-        // 로딩 완료 처리
+    const fetchTodos = async () => {
+      try {
+        const res = await axiosInstance.get(API_BASE_URL);
+        if (res.status === 200) setTodos(res.data.todos);
+      } catch (error) {
+        console.log('error : ', error);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchTodos();
   }, []);
 
   // 로딩이 끝난 후 보여줄 컴포넌트
