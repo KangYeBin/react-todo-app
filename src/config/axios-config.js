@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
           localStorage.setItem('ACCESS_TOKEN', accessToken); // 동일한 이름으로 localStorage에 담기
           // 실패한 원본 요청 정보에서 Authorization의 값을 새 토큰으로
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+          axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
           // axiosInstance를 사용해서 다시 한 번 원본의 요청을 보내고, 응답값을 원래 호출한 곳으로 리턴
           return axiosInstance(originalRequest);
         }
