@@ -7,7 +7,6 @@
 
 import axios from 'axios';
 import { API_BASE_URL as BASE, TODO, USER } from './host-config';
-import { useNavigate } from 'react-router-dom';
 
 const TODO_URL = BASE + TODO;
 const USER_URL = BASE + USER;
@@ -41,6 +40,13 @@ axiosInstance.interceptors.response.use(
   (response) => response, // 응답에 문제가 없다면 응답 내용 그대로 리턴
   async (error) => {
     console.log('response interceptor 동작, 응답 에러 발생');
+
+    // 응답이 실패했는데, 토큰 재발급을 요청하는 것이 아니라
+    // 로그인을 하지 않은 상황이라면 밑의 로직이 실행되지 않도록 return
+    if (error.response.data.message === 'INVALID_AUTH') {
+      console.log('로그인을 하지 않아서 401 발생');
+      return Promise.reject(error);
+    }
 
     // 원본 요청의 정보를 기억해놓는다 - 새로운 토큰을 받아서 다시 보내야하므로
     const originalRequest = error.config;

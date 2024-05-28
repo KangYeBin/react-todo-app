@@ -53,7 +53,7 @@ const Header = () => {
       const imageUrl = await res.text();
       setProfilUrl(imageUrl);
     } else {
-      const err = await res.error();
+      const err = await res.text();
       console.log('err : ', err);
       setProfilUrl(null);
     }
